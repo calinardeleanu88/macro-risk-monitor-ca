@@ -43,7 +43,7 @@ STATE_FILE = "risk_state.json"
 
 # ---- Logging / dashboard outputs ----
 LOG_CSV = "risk_log.csv"
-DASHBOARD_HTML = "risk_dashboard.html"
+DASHBOARD_HTML = "docs/index.html"
 
 # =========================
 # HELPERS
