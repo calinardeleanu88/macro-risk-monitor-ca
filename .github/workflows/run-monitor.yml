@@ -40,13 +40,13 @@ jobs:
           name: risk_outputs
           path: |
             risk_log.csv
-            risk_dashboard.html
+            docs/index.html
             risk_state.json
 
       - name: Commit updated outputs
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add risk_log.csv risk_dashboard.html risk_state.json || true
+                    git add risk_log.csv docs/index.html risk_state.json || true
           git diff --staged --quiet || git commit -m "Daily update"
           git push
