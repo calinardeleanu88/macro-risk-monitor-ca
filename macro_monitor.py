@@ -206,6 +206,45 @@ else:
     else:
         flag = "GREEN"
         flag_text = "🟢 GREEN – risk on"
+# =========================
+# YELLOW TYPE (context only)
+# =========================
+yellow_type = ""
+action_hint = ""
+
+if flag == "YELLOW":
+    # 1) Rotation-only yellow: core is phase 1 and score low, but confirmations triggered
+    if (current_core_phase == 1) and (current_core_score <= 2) and (smh_weak or energy_on):
+        yellow_type = "YELLOW (Rotation)"
+        action_hint = (
+            "Core e curat (risk-on), dar leadership-ul se mută. "
+            "Nu vinzi. Doar reduci agresivitatea pe high-beta și "
+            "direcționezi 10–20% din intrările noi spre energie/defensive."
+        )
+    # 2) Core deterioration yellow: phase 2 or rising phase-2 share
+    else:
+        yellow_type = "YELLOW (Core deterioration)"
+        action_hint = (
+            "Core-ul începe să se deterioreze. "
+            "Încetinești DCA pe tech (ex: 50–70% din cash nou), "
+            "eviți leverage, și aștepți confirmare (persistență 2–3 săptămâni)."
+        )
+
+elif flag == "RED":
+    yellow_type = "RED (Risk-off)"
+    action_hint = (
+        "Regim defensiv. Reduci expunerea totală, eviți high-beta, "
+        "crești cash/defensive. Execuție graduală, nu panică."
+    )
+else:
+    yellow_type = "GREEN (Risk-on)"
+    action_hint = (
+        "Regim favorabil. DCA normal, buy dips selectiv. "
+        "Nu supra-optimiza; respectă sizing."
+    )
+
+print(f"\n🧩 Regime label: {yellow_type}")
+print(f"🧭 Action hint: {action_hint}")
 
 # =========================
 # OUTPUT
@@ -309,6 +348,15 @@ if current_core_phase == 2:
     heat += 20
 elif current_core_phase == 3:
     heat += 40
+# Mild heat for rotation confirmations
+if energy_on or smh_weak:
+    heat += 10
+
+# Phase-based heat (context)
+if current_core_phase == 2:
+    heat += 20
+elif current_core_phase == 3:
+    heat += 40
 
 heat = int(max(0, min(100, heat)))
 
@@ -342,6 +390,8 @@ log_row.update({
     "rsi_state": rsi_state,
     "vix_state": vix_state,
     "watch": " | ".join(watch),
+    "regime_label": yellow_type,
+    "action_hint": action_hint
 })
 
 # =========================
