@@ -439,11 +439,34 @@ if PLOTLY_OK:
     # Row 3: flag numeric
     fig.add_trace(go.Scatter(x=df_dash.index, y=df_dash["flag_num"], name="Flag (1/2/3)", mode="lines"), row=3, col=1)
 
-    fig.update_layout(
-        title=f"Macro Risk Dashboard (updated {today})",
-        height=900,
-        showlegend=True
-    )
+    last_dt = df.index[-1].date()
+
+header_line = f"{yellow_type} | Heat: {heat}/100 | Core: FAZA {current_core_phase} (score {current_core_score:.1f})"
+sub_line = f"Rotation: SMH<200DMA={'YES' if smh_weak else 'NO'} | XLE/QQQ>50DMA={'YES' if energy_on else 'NO'} | Updated: {today}"
+
+fig.update_layout(
+    title=header_line,
+    height=900,
+    showlegend=True,
+    margin=dict(t=120)
+)
+
+fig.add_annotation(
+    text=sub_line,
+    xref="paper", yref="paper",
+    x=0, y=1.10,
+    showarrow=False,
+    align="left"
+)
+
+fig.add_annotation(
+    text=f"<b>Action:</b> {action_hint}",
+    xref="paper", yref="paper",
+    x=0, y=1.06,
+    showarrow=False,
+    align="left"
+)
+
 
     fig.write_html(DASHBOARD_HTML)
     print(f"✅ Dashboard generated: {DASHBOARD_HTML}")
