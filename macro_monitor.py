@@ -300,6 +300,16 @@ heat += 30 if rsi_q < 40 else (15 if rsi_q < 50 else 0)
 heat += 20 if spx_state == "BROKEN" else (8 if spx_vs_200_pct < 2.0 else 0)
 # VIX
 heat += 20 if vix > 25 else (10 if vix > 20 else 0)
+# Include rotation as mild heat (context)
+if energy_on or smh_weak:
+    heat += 10
+
+# Include core phase (context)
+if current_core_phase == 2:
+    heat += 20
+elif current_core_phase == 3:
+    heat += 40
+
 heat = int(max(0, min(100, heat)))
 
 watch = []
