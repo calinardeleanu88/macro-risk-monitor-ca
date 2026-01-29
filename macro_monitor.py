@@ -469,8 +469,10 @@ if PLOTLY_OK:
         align="left"
     )
 
+    os.makedirs("docs", exist_ok=True)
     fig.write_html(DASHBOARD_HTML)
     print(f"✅ Dashboard generated: {DASHBOARD_HTML}")
+
   
 
 # =========================
