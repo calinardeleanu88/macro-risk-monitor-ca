@@ -243,13 +243,96 @@ log_row = {
 if os.path.exists(LOG_CSV):
     log_df = pd.read_csv(LOG_CSV)
     # remove any existing row for today, then append
-    log_df = log_df[log_df["date"] != today]
+    log_df["date"] = log_df["date"].astype(str)
+    log_df = log_df[log_df["date"] != str(today)]
+
     log_df = pd.concat([log_df, pd.DataFrame([log_row])], ignore_index=True)
 else:
     log_df = pd.DataFrame([log_row])
 
 log_df.to_csv(LOG_CSV, index=False)
 print(f"\n✅ Logged to CSV: {LOG_CSV}")
+# =========================
+# CONTEXT CARD (extra detail, does NOT change verdict)
+# =========================
+last = df.iloc[-1]
+
+qqq = float(last["QQQ"])
+qqq_50 = float(last["QQQ_50"])
+spx = float(last["SPX"])
+spx_200 = float(last["SPX_200"])
+rsi_q = float(last["RSI_QQQ"])
+vix = float(last["VIX"])
+
+# Distances to key thresholds
+qqq_vs_50_pct = (qqq / qqq_50 - 1) * 100
+spx_vs_200_pct = (spx / spx_200 - 1) * 100
+rsi_to_50 = rsi_q - 50
+rsi_to_40 = rsi_q - 40
+vix_to_20 = vix - 20
+vix_to_25 = vix - 25
+
+# Component states (human-readable)
+price_state = "OK" if qqq >= qqq_50 * DMA_BUFFER else "BROKEN"
+spx_state = "OK" if spx >= spx_200 * DMA_BUFFER else "BROKEN"
+
+if rsi_q < 40:
+    rsi_state = "DANGER (<40)"
+elif rsi_q < 50:
+    rsi_state = "WEAK (40-50)"
+else:
+    rsi_state = "OK (>=50)"
+
+if vix > 25:
+    vix_state = "HIGH (>25)"
+elif vix > 20:
+    vix_state = "ELEVATED (20-25)"
+else:
+    vix_state = "OK (<=20)"
+
+# Heat 0–100 (context only)
+heat = 0
+# Price/MA proximity
+heat += 30 if price_state == "BROKEN" else (10 if qqq_vs_50_pct < 1.0 else 0)
+# RSI
+heat += 30 if rsi_q < 40 else (15 if rsi_q < 50 else 0)
+# SPX breadth
+heat += 20 if spx_state == "BROKEN" else (8 if spx_vs_200_pct < 2.0 else 0)
+# VIX
+heat += 20 if vix > 25 else (10 if vix > 20 else 0)
+heat = int(max(0, min(100, heat)))
+
+watch = []
+if qqq_vs_50_pct < 1.0: watch.append("QQQ aproape de 50DMA")
+if spx_vs_200_pct < 2.0: watch.append("SPX aproape de 200DMA")
+if 40 <= rsi_q < 55: watch.append("RSI în zona de tranziție")
+if 18 <= vix <= 22: watch.append("VIX aproape de 20")
+if not watch: watch.append("Nimic critic – trend stabil")
+
+print("\n🧾 CONTEXT CARD (nu schimbă verdictul)")
+print("------------------------------------")
+print(f"Heat (0-100): {heat}")
+print(f"QQQ vs 50DMA: {qqq_vs_50_pct:+.2f}% | State: {price_state}")
+print(f"SPX vs 200DMA: {spx_vs_200_pct:+.2f}% | State: {spx_state}")
+print(f"RSI(QQQ): {rsi_q:.1f} | {rsi_state} | Δ50={rsi_to_50:+.1f} | Δ40={rsi_to_40:+.1f}")
+print(f"VIX: {vix:.1f} | {vix_state} | Δ20={vix_to_20:+.1f} | Δ25={vix_to_25:+.1f}")
+print("Watch:")
+for w in watch:
+    print(" -", w)
+
+# Add to CSV log row
+log_row.update({
+    "heat": heat,
+    "qqq_vs_50_pct": round(qqq_vs_50_pct, 3),
+    "spx_vs_200_pct": round(spx_vs_200_pct, 3),
+    "rsi": round(rsi_q, 2),
+    "vix": round(vix, 2),
+    "price_state": price_state,
+    "spx_state": spx_state,
+    "rsi_state": rsi_state,
+    "vix_state": vix_state,
+    "watch": " | ".join(watch),
+})
 
 # =========================
 # 2) Plotly Dashboard (HTML)
