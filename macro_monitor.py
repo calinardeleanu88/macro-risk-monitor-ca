@@ -468,7 +468,7 @@ fig.add_annotation(
 )
 
 
-    fig.write_html(DASHBOARD_HTML)
+ fig.write_html(DASHBOARD_HTML)
     print(f"✅ Dashboard generated: {DASHBOARD_HTML}")
 else:
     print("⚠️ Plotly not available. Install with: pip install plotly")
