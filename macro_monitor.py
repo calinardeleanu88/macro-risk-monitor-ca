@@ -394,84 +394,84 @@ log_row.update({
     "action_hint": action_hint
 })
 
+
 # =========================
 # 2) Plotly Dashboard (HTML)
 # =========================
 if PLOTLY_OK:
     df_dash = df.tail(DASHBOARD_LOOKBACK_DAYS).copy()
 
-    # Create a numeric flag series for plotting
-    flag_map = {"GREEN": 1, "YELLOW": 2, "RED": 3}
-    # Recompute daily flag-like series for charting using same rules but per-day (core + rotation)
-    # (This doesn't affect today's decision; only for visualization.)
-    def day_flag(row):
-        core_phase = int(row["phase_core"])
-        smh_w = bool(row["rot_smh_weak"])
-        en_on = bool(row["rot_energy_on"])
-        # rolling 1y is expensive per-row; for viz we approximate with phase only + confirmations
-        if core_phase == 3:
-            return "RED"
-        if core_phase == 2 or smh_w or en_on:
-            return "YELLOW"
-        return "GREEN"
-
-    df_dash["flag_day"] = df_dash.apply(day_flag, axis=1)
-    df_dash["flag_num"] = df_dash["flag_day"].map(flag_map)
-
     fig = make_subplots(
         rows=3, cols=1,
         shared_xaxes=True,
-        vertical_spacing=0.08,
-        row_heights=[0.42, 0.33, 0.25],
-        subplot_titles=("Core Risk Score + Phase", "Rotation: XLE/QQQ Ratio", "Flags (GREEN=1, YELLOW=2, RED=3)")
+        row_heights=[0.4, 0.3, 0.3],
+        subplot_titles=("QQQ + 50DMA", "RSI (QQQ)", "Risk Phase")
     )
 
-    # Row 1: score + phase
-    fig.add_trace(go.Scatter(x=df_dash.index, y=df_dash["score_core"], name="Core score"), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df_dash.index, y=df_dash["phase_core"], name="Core phase"), row=1, col=1)
-    fig.add_hline(y=2, line_dash="dash", row=1, col=1)
-    fig.add_hline(y=4, line_dash="dash", row=1, col=1)
+    # --- PRICE ---
+    fig.add_trace(
+        go.Scatter(x=df_dash.index, y=df_dash["QQQ"], name="QQQ"),
+        row=1, col=1
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=df_dash.index,
+            y=df_dash["QQQ_50"] * DMA_BUFFER,
+            name="50DMA (buffer)",
+            line=dict(dash="dot")
+        ),
+        row=1, col=1
+    )
 
-    # Row 2: XLE/QQQ ratio + 50DMA
-    fig.add_trace(go.Scatter(x=df_dash.index, y=df_dash["XLE_QQQ"], name="XLE/QQQ"), row=2, col=1)
-    fig.add_trace(go.Scatter(x=df_dash.index, y=df_dash["XLE_QQQ_50"], name="XLE/QQQ 50DMA", line=dict(dash="dash")), row=2, col=1)
+    # --- RSI ---
+    fig.add_trace(
+        go.Scatter(x=df_dash.index, y=df_dash["RSI_QQQ"], name="RSI"),
+        row=2, col=1
+    )
+    fig.add_hline(y=40, line_dash="dash", row=2, col=1)
 
-    # Row 3: flag numeric
-    fig.add_trace(go.Scatter(x=df_dash.index, y=df_dash["flag_num"], name="Flag (1/2/3)", mode="lines"), row=3, col=1)
+    # --- PHASE ---
+    fig.add_trace(
+        go.Scatter(
+            x=df_dash.index,
+            y=df_dash["phase_core"],
+            name="Phase",
+            mode="lines",
+            fill="tozeroy"
+        ),
+        row=3, col=1
+    )
 
-    last_dt = df.index[-1].date()
+    # --- HEADER & CONTEXT ---
+    header_line = f"{yellow_type} | Heat: {heat}/100 | Core: FAZA {current_core_phase} (score {current_core_score:.1f})"
+    sub_line = f"Rotation: SMH<200DMA={'YES' if smh_weak else 'NO'} | XLE/QQQ>50DMA={'YES' if energy_on else 'NO'} | Updated: {today}"
 
-header_line = f"{yellow_type} | Heat: {heat}/100 | Core: FAZA {current_core_phase} (score {current_core_score:.1f})"
-sub_line = f"Rotation: SMH<200DMA={'YES' if smh_weak else 'NO'} | XLE/QQQ>50DMA={'YES' if energy_on else 'NO'} | Updated: {today}"
+    fig.update_layout(
+        title=header_line,
+        height=900,
+        showlegend=True,
+        margin=dict(t=120)
+    )
 
-fig.update_layout(
-    title=header_line,
-    height=900,
-    showlegend=True,
-    margin=dict(t=120)
-)
+    fig.add_annotation(
+        text=sub_line,
+        xref="paper", yref="paper",
+        x=0, y=1.10,
+        showarrow=False,
+        align="left"
+    )
 
-fig.add_annotation(
-    text=sub_line,
-    xref="paper", yref="paper",
-    x=0, y=1.10,
-    showarrow=False,
-    align="left"
-)
+    fig.add_annotation(
+        text=f"<b>Action:</b> {action_hint}",
+        xref="paper", yref="paper",
+        x=0, y=1.06,
+        showarrow=False,
+        align="left"
+    )
 
-fig.add_annotation(
-    text=f"<b>Action:</b> {action_hint}",
-    xref="paper", yref="paper",
-    x=0, y=1.06,
-    showarrow=False,
-    align="left"
-)
-
-
- fig.write_html(DASHBOARD_HTML)
+    fig.write_html(DASHBOARD_HTML)
     print(f"✅ Dashboard generated: {DASHBOARD_HTML}")
-else:
-    print("⚠️ Plotly not available. Install with: pip install plotly")
+  
 
 # =========================
 # ALERT ON CHANGE ONLY
