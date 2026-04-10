@@ -1,11 +1,11 @@
 {
-  "date": "2026-04-09",
+  "date": "2026-04-10",
   "flag": "RED",
-  "core_score": 3.0,
+  "core_score": 0.0,
   "core_phase": 3,
   "p1": 70.63492063492063,
   "p2": 12.698412698412698,
   "p3": 16.666666666666664,
   "smh_weak": false,
-  "energy_on": true
+  "energy_on": false
 }
