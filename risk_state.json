@@ -1,11 +1,11 @@
 {
-  "date": "2026-07-10",
-  "flag": "GREEN",
+  "date": "2026-07-13",
+  "flag": "YELLOW",
   "core_score": 1.0,
   "core_phase": 1,
   "p1": 79.76190476190477,
   "p2": 9.920634920634921,
   "p3": 10.317460317460316,
   "smh_weak": false,
-  "energy_on": false
+  "energy_on": true
 }
