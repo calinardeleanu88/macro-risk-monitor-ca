@@ -136,3 +136,4 @@ date,flag,core_score,core_phase,p1_1y,p2_1y,p3_1y,smh_weak,energy_rotation
 2026-07-30,RED,5.0,3,76.98,12.3,10.71,False,True
 2026-07-31,RED,5.0,3,76.59,12.3,11.11,False,True
 2026-08-03,RED,4.0,3,76.19,12.3,11.51,False,True
+2026-08-04,RED,2.0,3,75.79,12.3,11.9,False,True
