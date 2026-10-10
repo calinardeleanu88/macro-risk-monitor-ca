@@ -179,3 +179,4 @@ date,flag,core_score,core_phase,p1_1y,p2_1y,p3_1y,smh_weak,energy_rotation
 2026-10-06,GREEN,0.0,1,75.4,12.7,11.9,False,False
 2026-10-08,GREEN,0.0,1,75.4,12.7,11.9,False,False
 2026-10-09,GREEN,0.0,1,75.4,12.7,11.9,False,False
+2026-10-10,YELLOW,0.0,1,75.4,12.7,11.9,False,True
