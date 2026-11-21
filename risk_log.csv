@@ -206,3 +206,4 @@ date,flag,core_score,core_phase,p1_1y,p2_1y,p3_1y,smh_weak,energy_rotation
 2026-11-18,YELLOW,4.0,2,67.46,17.86,14.68,True,True
 2026-11-19,YELLOW,5.0,2,67.06,18.25,14.68,True,True
 2026-11-20,YELLOW,6.0,2,66.67,18.65,14.68,True,True
+2026-11-21,RED,7.0,3,66.27,18.65,15.08,True,True
